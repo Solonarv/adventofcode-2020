@@ -1,0 +1,77 @@
+cabal-version:       2.4
+name:                aoc2020
+version:             0.1.0.0
+synopsis:            My Advent of Code 2020 solutions.
+description:         My Advent of Code 2020 solutions.
+homepage:            https://github.com/Solonarv/adventofcode-2020#README
+license:             MIT
+license-file:        LICENSE
+author:              Solonarv
+maintainer:          nstamm@gmx.de
+-- copyright:
+-- category:
+build-type:          Simple
+extra-source-files:  CHANGELOG.md
+
+common deps
+  build-depends:       base >=4.12 && <5
+                     , containers ^>= 0.6
+                     , vector
+                     , bytestring
+                     , text
+                     , unordered-containers
+                     , megaparsec ^>= 8.0
+                     , parser-combinators
+                     , linear
+                     , split
+                     , conduit
+                     , mtl
+                     , monad-loops
+                     , lens
+                     , finite-typelits
+
+common lang
+  default-language:    Haskell2010
+  -- -XKitchenSink
+  default-extensions:  TypeFamilies FlexibleContexts FlexibleInstances DataKinds GADTs
+                       TypeFamilyDependencies TypeOperators PolyKinds RankNTypes
+                       TypeApplications ScopedTypeVariables ConstraintKinds FunctionalDependencies
+                       MultiParamTypeClasses NamedFieldPuns LambdaCase BangPatterns DerivingStrategies
+                       GeneralizedNewtypeDeriving RoleAnnotations TupleSections BlockArguments
+                       DeriveFunctor DeriveFoldable DeriveTraversable DerivingVia ViewPatterns
+  ghc-options:         -Wall -O2
+
+executable solve
+  import: deps, lang
+  main-is:             Main.hs
+  hs-source-dirs:      src
+  build-depends:       aoc2020
+                     , day01
+  ghc-options:         -threaded -rtsopts -funbox-small-strict-fields
+
+library
+  import: deps, lang
+  hs-source-dirs:      harness
+  exposed-modules:     AOC.Solution, AOC.Harness
+  build-depends:       optparse-applicative
+                     , ansi-terminal
+                     , directory
+                     , htoml
+                     , req
+                     , http-client
+                     , time
+                     , data-default
+  ghc-options:         -Wno-orphans
+
+library util
+  import: deps, lang
+  hs-source-dirs:      util
+  exposed-modules:     Util, PagedVector, ParsingPrelude, RatAngle
+  build-depends:       primitive
+
+library day01
+  import: deps, lang
+  exposed-modules: Day01
+  hs-source-dirs: day01
+  build-depends: aoc2020, util
+

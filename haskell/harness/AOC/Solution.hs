@@ -25,6 +25,9 @@ data Solver i o = Solver
   , display :: o -> String
   }
 
+defSolver :: Show o => Solver i o
+defSolver = Solver (const Nothing) show
+
 runSolver :: Solution i a b -> Part -> i -> Maybe String
 runSolver Solution{solveA = Solver{solve,display}} PartA dat = display <$> solve dat
 runSolver Solution{solveB = Solver{solve,display}} PartB dat = display <$> solve dat

@@ -11,14 +11,12 @@ import Util
 solution :: Solution [Int] Int Int
 solution = Solution
   { decodeInput = decimal `sepBy` space1
-  , solveA = Solver
+  , solveA = defSolver
     { solve = productOfTwo 2020
-    , display = show
     } 
-  , solveB = Solver
+  , solveB = defSolver
     {
       solve = productOfThree 2020
-    , display = show
     }
   , tests =
     [ "1721 979 366 299 675 1456" :=> [(PartA, "514579"), (PartB, "241861950")]

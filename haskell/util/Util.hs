@@ -117,6 +117,9 @@ safeLast [] = Nothing
 safeLast [x] = Just x
 safeLast (_:xs) = safeLast xs
 
+safeIndex :: Int -> [a] -> Maybe a
+safeIndex n = safeHead . drop n
+
 diag :: a -> (a, a)
 diag x = (x,x)
 
@@ -151,3 +154,6 @@ multimapAt i (Map.filter (not.null) -> m)
 
 funcpow :: forall a. Int -> (a -> a) -> a -> a
 funcpow n = coerce (stimes @(Endo a) n)
+
+countHits :: Foldable t => (a -> Bool) -> t a -> Int
+countHits p = foldl' (\s e -> if p e then 1 + s else s) 0

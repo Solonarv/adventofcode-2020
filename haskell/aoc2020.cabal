@@ -46,7 +46,7 @@ executable solve
   main-is:             Main.hs
   hs-source-dirs:      src
   build-depends:       aoc2020
-                     , day01
+                     , day01, day02
   ghc-options:         -threaded -rtsopts -funbox-small-strict-fields
 
 library
@@ -73,5 +73,11 @@ library day01
   import: deps, lang
   exposed-modules: Day01
   hs-source-dirs: day01
+  build-depends: aoc2020, util
+
+library day02
+  import: deps, lang
+  exposed-modules: Day02
+  hs-source-dirs: day02
   build-depends: aoc2020, util
 

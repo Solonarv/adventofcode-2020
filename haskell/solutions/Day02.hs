@@ -21,11 +21,7 @@ solution = Solution
     ]
   }
 
-data Policy = Policy
-  { fstIndex :: Int
-  , sndIndex :: Int
-  , character :: Char
-  }
+data Policy = Policy Int Int Char
 
 policy :: Parser Policy
 policy = Policy
@@ -43,11 +39,11 @@ entry = (,)
   <*> some letterChar 
 
 isValidOld :: Policy -> String -> Bool
-isValidOld Policy{fstIndex,sndIndex,character} s = fstIndex <= occ && occ <= sndIndex
+isValidOld (Policy minCount maxCount character) s = minCount <= occ && occ <= maxCount
   where occ = countHits (== character) s 
 
 isValidNew :: Policy -> String -> Bool
-isValidNew Policy{fstIndex,sndIndex,character} s = fstMatches /= sndMatches
+isValidNew (Policy fstIndex sndIndex character) s = fstMatches /= sndMatches
   where
     fstMatches = safeIndex (fstIndex-1) s == Just character
     sndMatches = safeIndex (sndIndex-1) s == Just character

@@ -45,8 +45,7 @@ executable solve
   import: deps, lang
   main-is:             Main.hs
   hs-source-dirs:      src
-  build-depends:       aoc2020
-                     , day01, day02
+  build-depends:       aoc2020, solutions
   ghc-options:         -threaded -rtsopts -funbox-small-strict-fields
 
 library
@@ -69,15 +68,8 @@ library util
   exposed-modules:     Util, PagedVector, ParsingPrelude, RatAngle
   build-depends:       primitive
 
-library day01
+library solutions
   import: deps, lang
-  exposed-modules: Day01
-  hs-source-dirs: day01
+  exposed-modules: Day01, Day02
+  hs-source-dirs: solutions
   build-depends: aoc2020, util
-
-library day02
-  import: deps, lang
-  exposed-modules: Day02
-  hs-source-dirs: day02
-  build-depends: aoc2020, util
-

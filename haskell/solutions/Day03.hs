@@ -2,15 +2,17 @@ module Day03 where
 
 import Control.Arrow ((&&&))
 
+import Control.Lens
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Linear
 
 import AOC.Solution
+import Grid2D
 import ParsingPrelude
 import Util
 
-solution :: Solution (V2 Int, Set (V2 Int)) Int Int
+solution :: Solution (Grid2D Bool) Int Int
 solution = Solution
   { decodeInput = treeLocations
   , solveA = defSolver
@@ -36,25 +38,21 @@ solution = Solution
     ]
   }
 
-treeLocations :: Parser (V2 Int, Set (V2 Int))
-treeLocations = munge <$> rawGrid
+treeLocations :: Parser (Grid2D Bool)
+treeLocations = fromLines <$> (some point `sepBy1` eol)
   where
-    munge grid = (V2 (length (head grid)) (length grid), toSet grid)
-    toSet grid = Set.fromList
-      [ V2 x y
-      | (y, line) <- zip [0..] grid
-      , (x, tree) <- zip [0..] line
-      , tree
-      ]
-    rawGrid = some point `sepBy1` eol
     point = True <$ char '#' <|> False <$ char '.'
 
-countTreesHit :: V2 Int -> (V2 Int, Set (V2 Int)) -> Int
-countTreesHit (V2 dx dy) (V2 width height, trees) = Set.size (trees `Set.intersection` (Set.fromList locations))
-  where
-    locations = [V2 (dx*i `mod` width) (dy*i) | i <- [0.. height `div` dy]]
+countTreesHit :: V2 Int -> (Grid2D Bool) -> Int
+countTreesHit (V2 dx dy) grid = length
+  [ ()
+  | i <- [0, 1 .. (height grid - 1) `div` dy]
+  , let x = (dx*i) `mod` width grid
+  , let y = dy*i
+  , grid ^. gridPoint x y
+  ]
 
-tryManySlopes :: [V2 Int] -> (V2 Int, Set (V2 Int)) -> [Int]
+tryManySlopes :: [V2 Int] -> (Grid2D Bool) -> [Int]
 tryManySlopes slopes grid = flip countTreesHit grid <$> slopes
 
 slopesToTry :: [V2 Int]

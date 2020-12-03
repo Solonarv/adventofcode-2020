@@ -65,7 +65,7 @@ library
 library util
   import: deps, lang
   hs-source-dirs:      util
-  exposed-modules:     Util, PagedVector, ParsingPrelude, RatAngle
+  exposed-modules:     Grid2D, PagedVector, ParsingPrelude, RatAngle, Util
   build-depends:       primitive
 
 library solutions

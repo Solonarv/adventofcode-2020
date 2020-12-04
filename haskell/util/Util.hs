@@ -157,3 +157,10 @@ funcpow n = coerce (stimes @(Endo a) n)
 
 countHits :: Foldable t => (a -> Bool) -> t a -> Int
 countHits p = foldl' (\s e -> if p e then 1 + s else s) 0
+
+(<&&>), (<||>) :: Applicative f => f Bool -> f Bool -> f Bool
+(<&&>) = liftA2 (&&)
+(<||>) = liftA2 (||)
+
+within :: Ord a => a -> a -> a -> Bool
+within lo hi x = x >= lo && x <= hi

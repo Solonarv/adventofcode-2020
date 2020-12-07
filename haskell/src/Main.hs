@@ -7,6 +7,7 @@ import qualified Day03
 import qualified Day04
 import qualified Day05
 import qualified Day06
+import qualified Day07
 
 solutions :: Solutions
 solutions = solutionsFromList
@@ -16,6 +17,7 @@ solutions = solutionsFromList
   , S Day04.solution
   , S Day05.solution
   , S Day06.solution
+  , S Day07.solution
   ]
 
 main :: IO ()

@@ -39,7 +39,7 @@ common lang
                        MultiParamTypeClasses NamedFieldPuns LambdaCase BangPatterns DerivingStrategies
                        GeneralizedNewtypeDeriving RoleAnnotations TupleSections BlockArguments
                        DeriveFunctor DeriveFoldable DeriveTraversable DerivingVia ViewPatterns
-  ghc-options:         -Wall -O2
+  ghc-options:         -Wall -Wno-unused-do-bind -O2
 
 executable solve
   import: deps, lang
@@ -71,5 +71,6 @@ library util
 library solutions
   import: deps, lang
   exposed-modules: Day01, Day02, Day03, Day04, Day05, Day06
+                 , Day07
   hs-source-dirs: solutions
   build-depends: aoc2020, util

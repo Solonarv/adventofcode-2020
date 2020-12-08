@@ -19,10 +19,10 @@ solution :: Solution (Vector Instr) Int Int
 solution = Solution
   { decodeInput = Vector.fromList <$> (instr `sepBy` eol)
   , solveA = defSolver
-    { solve = fst . runUntilLoop
+    { solve = resultIf Loop . run
     }
   , solveB = defSolver
-    { solve = programResult <=< fixedProgram
+    { solve = resultIf Halt . run <=< makeHalting
     }
   , tests =
     [ unlines
@@ -67,19 +67,30 @@ newtype CPU a = CPU { runCPU :: Vector Instr -> CPUState -> (a, CPUState) }
   deriving (Functor, Applicative, Monad, MonadReader (Vector Instr), MonadState CPUState)
   via ReaderT (Vector Instr) (State CPUState)
 
-runUntilLoop :: Vector Instr -> (Maybe Int, CPUState)
-runUntilLoop prog = runCPU stepUntilRepeat prog startingState
+findLoopAcc :: Vector Instr -> Maybe Int
+findLoopAcc prog = case run prog of
+  (Halt, st) -> Just (cpuAcc st)
+  _ -> Nothing
+
+run :: Vector Instr -> (EndState, CPUState)
+run prog = runCPU stepUntilRepeatOrHalt prog startingState
   where
     startingState = CPUState 0 0 (Vector.replicate (length prog) False)
 
-stepUntilRepeat :: CPU (Maybe Int)
-stepUntilRepeat = do
-  CPUState{cpuPC, cpuAcc, cpuVisited} <- get
+data EndState = Halt | Loop
+  deriving (Eq, Ord, Show)
+
+resultIf :: EndState -> (EndState, CPUState) -> Maybe Int
+resultIf des (got, cpu) = cpuAcc cpu <$ guard (des == got)
+
+stepUntilRepeatOrHalt :: CPU EndState
+stepUntilRepeatOrHalt = do
+  CPUState{cpuPC, cpuVisited} <- get
   if cpuPC >= 0 && cpuPC < length cpuVisited
     then if cpuVisited Vector.! cpuPC
-      then pure (Just cpuAcc)
-      else singleStep >> stepUntilRepeat
-    else pure Nothing
+      then pure Loop
+      else singleStep >> stepUntilRepeatOrHalt
+    else pure Halt
 
 singleStep :: CPU ()
 singleStep = do
@@ -92,12 +103,12 @@ singleStep = do
     Jmp -> modify \s -> s { cpuPC = pc+arg }
 
 halts :: Vector Instr -> Bool
-halts = isNothing . fst . runUntilLoop
+halts = (== Halt) . fst . run
 
-fixedProgram :: Vector Instr -> Maybe (Vector Instr)
-fixedProgram prog = case runUntilLoop prog of
-  (Nothing, _) -> Just prog -- Vector Instr halts already
-  (_, st) -> let
+makeHalting :: Vector Instr -> Maybe (Vector Instr)
+makeHalting prog = case run prog of
+  (Halt, _) -> Just prog -- Vector Instr halts already
+  (Loop, st) -> let
     otherOp Acc = Nothing
     otherOp Jmp = Just Nop
     otherOp Nop = Just Jmp
@@ -110,8 +121,3 @@ fixedProgram prog = case runUntilLoop prog of
       , let betterProgram = prog Vector.// [(i, candInstr { instrOp = newOp } )]
       , halts betterProgram
       ]
-
-programResult :: Vector Instr -> Maybe Int
-programResult prog = case runUntilLoop prog of
-  (Nothing, s) -> Just (cpuAcc s)
-  _ -> Nothing

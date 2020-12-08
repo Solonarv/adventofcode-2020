@@ -7,7 +7,7 @@ module ParsingPrelude
 
 import Data.Void
 
-import Text.Megaparsec hiding (Stream(..))
+import Text.Megaparsec hiding (Stream(..), State(..))
 import Text.Megaparsec.Char
 import Text.Megaparsec.Char.Lexer (decimal, binary, octal, hexadecimal, scientific, float, signed)
 

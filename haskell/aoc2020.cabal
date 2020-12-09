@@ -39,20 +39,22 @@ common lang
                        MultiParamTypeClasses NamedFieldPuns LambdaCase BangPatterns DerivingStrategies
                        GeneralizedNewtypeDeriving RoleAnnotations TupleSections BlockArguments
                        DeriveFunctor DeriveFoldable DeriveTraversable DerivingVia ViewPatterns
+                       ImplicitParams
   ghc-options:         -Wall -Wno-unused-do-bind -O2
 
 executable solve
   import: deps, lang
   main-is:             Main.hs
   hs-source-dirs:      src
-  build-depends:       aoc2020, solutions
+  build-depends:       aoc2020, solutions, util
   ghc-options:         -threaded -rtsopts -funbox-small-strict-fields
 
 library
   import: deps, lang
   hs-source-dirs:      harness
   exposed-modules:     AOC.Solution, AOC.Harness
-  build-depends:       optparse-applicative
+  build-depends:       util
+                     , optparse-applicative
                      , ansi-terminal
                      , directory
                      , htoml
@@ -65,7 +67,7 @@ library
 library util
   import: deps, lang
   hs-source-dirs:      util
-  exposed-modules:     Grid2D, PagedVector, ParsingPrelude, RatAngle, Util
+  exposed-modules:     DynMap, Grid2D, PagedVector, ParsingPrelude, RatAngle, Util
   build-depends:       primitive
 
 library solutions

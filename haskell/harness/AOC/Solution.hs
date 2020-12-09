@@ -1,8 +1,9 @@
 module AOC.Solution where
 
-import Data.Void (Void)
+import Data.Typeable
 
-import Text.Megaparsec (Parsec)
+import DynMap
+import ParsingPrelude (Parser)
 
 data Part = PartA | PartB deriving (Eq, Ord, Show)
 
@@ -14,22 +15,29 @@ displayPart PartA = 'a'
 displayPart PartB = 'b'
 
 data Solution i a b = Solution
-  { decodeInput :: Parsec Void String i
+  { decodeInput :: Parser i
   , solveA      :: Solver i a
   , solveB      :: Solver i b
   , tests       :: [Test]
   }
 
 data Solver i o = Solver
-  { solve :: i -> Maybe o
-  , display :: o -> String
+  { solve :: HasDyns => i -> Maybe o
+  , display :: HasDyns => o -> String
   }
 
 defSolver :: Show o => Solver i o
 defSolver = Solver (const Nothing) show
 
-runSolver :: Solution i a b -> Part -> i -> Maybe String
+runSolver :: HasDyns => Solution i a b -> Part -> i -> Maybe String
 runSolver Solution{solveA = Solver{solve,display}} PartA dat = display <$> solve dat
 runSolver Solution{solveB = Solver{solve,display}} PartB dat = display <$> solve dat
 
-data Test = String :=> [(Part, String)]
+data Test
+  = String :=> [(Part, String)]
+  | forall a. Typeable a => WithDyn String a Test
+
+processTest :: Test -> (DynMap, String, [(Part, String)])
+processTest (i :=> o) = (emptyDynMap, i, o)
+processTest (WithDyn k v inner) = (addDyn k v dyns, i, o)
+  where (dyns, i, o) = processTest inner

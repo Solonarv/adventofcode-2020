@@ -34,6 +34,7 @@ import qualified Text.Toml as Toml
 import qualified Text.Toml.Types as Toml
 
 import AOC.Solution
+import DynMap
 
 type Day = Finite 25
 
@@ -205,7 +206,8 @@ runTestsOn :: Int -> Solution i a b -> [Part] -> IO ()
 runTestsOn day sln@Solution{tests,decodeInput} parts = do
   fgColor Ansi.Vivid Ansi.Blue
   printf "Running tests for day %v...\n" day
-  for_ (zip [1..] tests) $ \(n :: Int, input :=> expected) -> do
+  for_ (zip [1..] tests) $ \(n :: Int, thisTest) -> do
+    let (dyns, input, expected) = processTest thisTest
     fgColor Ansi.Vivid Ansi.Blue
     printf "  Test #%v\n" n
     case parse decodeInput "<test input>" . List.dropWhile isSpace . List.dropWhileEnd isSpace $ input of
@@ -215,7 +217,7 @@ runTestsOn day sln@Solution{tests,decodeInput} parts = do
         printf (errorBundlePretty err)
       Right dat -> for_ parts $ \part ->
         for_ (List.lookup part expected) $ \expectedResult ->
-          case runSolver sln part dat of
+          let ?dyns = dyns in case runSolver sln part dat of
             Nothing -> do
               fgColor Ansi.Dull Ansi.Red
               printf "    %v: [X] No solution.\n" (displayPart part)
@@ -253,7 +255,7 @@ runSolveOn day opts cfg upload sln parts = do
       printf "  Couldn't decode input! \n"
       printf (errorBundlePretty err)
     Right dat -> for_ parts $ \part -> do
-      case runSolver sln part dat of
+      let ?dyns = emptyDynMap in case runSolver sln part dat of
         Nothing  -> do
           fgColor Ansi.Dull Ansi.Red
           printf "  %v: [X] No solution.\n" (displayPart part)

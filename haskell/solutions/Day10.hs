@@ -28,19 +28,18 @@ solution = Solution
     ]
   }
 
-combine :: (Sum Int, Sum Int, Sum Int) -> Int
-combine (x, _, z) = getSum (x*z)
+combine :: (Sum Int, Sum Int) -> Int
+combine (x, z) = getSum (x*z)
 
 addEnds :: [Int] -> [Int]
 addEnds xs = 0 : maximum xs+3 : xs
 
-countDifferences :: [Int] -> (Sum Int, Sum Int, Sum Int)
+countDifferences :: [Int] -> (Sum Int, Sum Int)
 countDifferences = summarize . (zipWith subtract <*> tail) . sort
   where
     summarize = foldMap \case
-      1 -> (1, 0, 0)
-      2 -> (0, 1, 0)
-      3 -> (0, 0, 1)
+      1 -> (1, 0)
+      3 -> (0, 1)
       _ -> mempty
 
 countPaths :: [Int] -> Int
@@ -53,5 +52,7 @@ mkDag = IntSet.fromList
 countDagPaths :: Int -> Int -> IntSet -> Int
 countDagPaths start end dag = paths start
   where
-    paths node = IntMap.findWithDefault 0 node (IntMap.insert end 1 (IntMap.fromSet go dag))
+    paths node 
+      | node == end = 1
+      | otherwise = IntMap.findWithDefault 0 node (IntMap.fromSet go dag)
     go node = paths (node+1) + paths (node+2) + paths (node+3)

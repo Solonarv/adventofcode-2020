@@ -17,6 +17,7 @@ import Data.IntMap.Strict (IntMap)
 import qualified Data.IntMap.Strict as IntMap
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import qualified Data.Map.Lazy as LazyMap
 import qualified Data.Map.Internal as Map.Internal
 
 -- | Appropriately strict version of 'sum'.
@@ -164,3 +165,10 @@ countHits p = foldl' (\s e -> if p e then 1 + s else s) 0
 
 within :: Ord a => a -> a -> a -> Bool
 within lo hi x = x >= lo && x <= hi
+
+iterateUntilAnyRepeat :: Ord a => (a -> a) -> a -> (Int, a)
+iterateUntilAnyRepeat f start = go (LazyMap.singleton start 1) start
+  where
+    go seen x = let x' = f x in case LazyMap.lookup x' seen of
+      Nothing -> go (LazyMap.insert x' 1 (LazyMap.map (+1) seen)) x'
+      Just !n -> (n, x)

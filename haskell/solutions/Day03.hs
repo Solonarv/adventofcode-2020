@@ -49,7 +49,7 @@ countTreesHit (V2 dx dy) grid = length
   | i <- [0, 1 .. (height grid - 1) `div` dy]
   , let x = (dx*i) `mod` width grid
   , let y = dy*i
-  , grid ^. gridPoint x y
+  , Just True == grid ^? gridPoint x y
   ]
 
 tryManySlopes :: [V2 Int] -> (Grid2D Bool) -> [Int]

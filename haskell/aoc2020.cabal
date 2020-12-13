@@ -73,6 +73,6 @@ library util
 library solutions
   import: deps, lang
   exposed-modules: Day01, Day02, Day03, Day04, Day05, Day06
-                 , Day07, Day08, Day09, Day10, Day11
+                 , Day07, Day08, Day09, Day10, Day11, Day12
   hs-source-dirs: solutions
   build-depends: aoc2020, util

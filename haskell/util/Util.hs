@@ -3,6 +3,7 @@ module Util where
 import Control.Applicative
 import Control.Monad
 import Control.Monad.ST
+import Data.Bits
 import Data.Coerce
 import Data.Foldable
 import Data.Function
@@ -172,3 +173,10 @@ iterateUntilAnyRepeat f start = go (LazyMap.singleton start 1) start
     go seen x = let x' = f x in case LazyMap.lookup x' seen of
       Nothing -> go (LazyMap.insert x' 1 (LazyMap.map (+1) seen)) x'
       Just !n -> (n, x)
+
+bitsToBinary :: Bits a => [Bool] -> a
+bitsToBinary = go zeroBits
+  where
+    go !r [] = r `shiftR` 1
+    go !r (False:xs) = go (r `shiftL` 1) xs
+    go !r (True:xs) = go ((r `shiftL` 1) `setBit` 1) xs

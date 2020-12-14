@@ -32,14 +32,7 @@ seat :: Parser Seat
 seat = Seat <$> binary "F" "B" 7 <*> binary "L" "R" 3
 
 binary :: Bits a => String -> String -> Int -> Parser a
-binary s0 s1 n = reduce <$> count n (False <$ string s0 <|> True <$ string s1)
-
-reduce :: Bits a => [Bool] -> a
-reduce = go zeroBits
-  where
-    go !r [] = r `shiftR` 1
-    go !r (False:xs) = go (r `shiftL` 1) xs
-    go !r (True:xs) = go ((r `shiftL` 1) `setBit` 1) xs
+binary s0 s1 n = bitsToBinary <$> count n (False <$ string s0 <|> True <$ string s1)
 
 seatID :: Seat -> Word16
 seatID (Seat r c) = fromIntegral r * 8 + fromIntegral c

@@ -11,8 +11,10 @@ import Data.Maybe
 import Data.Monoid
 import Data.IORef
 import Data.Semigroup
+import Numeric.Natural
 import System.IO.Unsafe
 
+import Control.Comonad
 import Control.Monad.Primitive
 import Data.IntMap.Strict (IntMap)
 import qualified Data.IntMap.Strict as IntMap
@@ -137,10 +139,29 @@ infixr 5 :>>
 data Stream a = a :>> Stream a
   deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
 
+instance Comonad Stream where
+  extract (a :>> _) = a
+  duplicate s@(_ :>> t) = s :>> duplicate t
+
 unfoldStream :: (b -> (a, b)) -> b -> Stream a
 unfoldStream f = loop
   where
     loop x = let (a, x') = f x in a :>> loop x'
+
+streamAt :: Natural -> Stream a -> a
+streamAt n = extract . dropStream n
+
+dropStream :: Natural -> Stream a -> Stream a
+dropStream 0 s = s
+dropStream n (_ :>> t) = dropStream (n-1) t
+
+takeStream :: Natural -> Stream a -> [a]
+takeStream 0 _ = []
+takeStream n (h :>> t) = h : takeStream (n-1) t
+
+splitStreamAt :: Natural -> Stream a -> ([a], Stream a)
+splitStreamAt 0 s = ([], s)
+splitStreamAt n (h :>> t) = let ~(begin, end) = splitStreamAt (n-1) t in (h:begin, end)
 
 liftST :: PrimMonad m => ST (PrimState m) a -> m a
 liftST = stToPrim

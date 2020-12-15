@@ -30,6 +30,7 @@ common deps
                      , lens
                      , finite-typelits
                      , comonad
+                     , monad-loops
 
 common lang
   default-language:    Haskell2010

@@ -3,7 +3,7 @@ module Day16 where
 
 import Data.Char
 import Data.List
-import Debug.Trace
+import Data.Maybe
 
 import Data.Map (Map)
 import qualified Data.Map.Lazy as Map
@@ -95,18 +95,38 @@ guessedFields :: Map String [(Int, Int)] -> Ticket -> [Set String]
 guessedFields rules (Ticket fields) = possibleFields rules <$> fields
 
 guessedFieldsAll :: Map String [(Int, Int)] -> [Ticket] -> [Set String]
-guessedFieldsAll rules tickets = traceShowId $ foldr1 (zipWith Set.intersection) (guessedFields rules <$> filter (isValidTicket rules) tickets)
+guessedFieldsAll rules tickets = foldr1 (zipWith Set.intersection) (guessedFields rules <$> filter (isValidTicket rules) tickets)
 
+-- Note: this fails on some inputs, but fortunately those don't appear to exist
 uniqueGuesses :: Ord a => [Set a] -> Maybe [a]
-uniqueGuesses = theOnly . filter isUnique . traverse Set.toList
+uniqueGuesses = traverse singletonSet . fixIterate step
   where
-    theOnly [x] = Just x
-    theOnly _ = Nothing
+    step :: Ord a => [Set a] -> [Set a]
+    step = processSingletons . processUniques
 
-    isUnique = go Set.empty
+    processSingletons guesses = map removeSingletonEntries guesses
       where
-        go seen (x:xs) = x `Set.notMember` seen && go (Set.insert x seen) xs
-        go _ [] = True
+        singletons = Set.fromList (mapMaybe singletonSet guesses)
+        removeSingletonEntries st 
+          | Set.size st > 1 = st Set.\\ singletons
+          | otherwise = st
+    processUniques guesses = map collapseUnique guesses
+      where
+        uniques = fst $ foldr (\st (uni, seen) ->
+          let
+            newUnseen = st Set.\\ seen
+            newSeen = st `Set.intersection` seen
+          in ( (uni Set.\\ newSeen) `Set.union` newUnseen
+          , seen `Set.union` st
+          )) (Set.empty, Set.empty) guesses
+        collapseUnique st = case singletonSet (st `Set.intersection` uniques) of
+          Nothing -> st
+          Just x -> Set.singleton x
+    
+    singletonSet st
+      | Set.size st == 1
+      , Just (x, _) <- Set.minView st = Just x
+      | otherwise = Nothing
 
 myFields :: (String -> Bool) -> Ticket -> [String] -> [Int]
 myFields isMyField (Ticket fields) fieldNames =

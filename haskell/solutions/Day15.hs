@@ -3,13 +3,9 @@ module Day15 where
 
 import Control.Monad.ST
 import Data.STRef
--- import Debug.Trace
 
 import Control.Monad.Loops (whileM_)
--- import Data.Vector.Unboxed.Mutable (MVector)
 import qualified Data.Vector.Unboxed.Mutable as MVector
--- import qualified Data.Vector.Unboxed as Vector
--- import Data.IntMap (IntMap)
 import qualified Data.IntMap.Strict as IntMap
 
 import AOC.Solution

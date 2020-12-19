@@ -201,3 +201,6 @@ bitsToBinary = go zeroBits
     go !r [] = r `shiftR` 1
     go !r (False:xs) = go (r `shiftL` 1) xs
     go !r (True:xs) = go ((r `shiftL` 1) `setBit` 1) xs
+
+löb :: Functor f => f (f a -> a) -> f a
+löb ffs = out where out = fmap ($ out) ffs

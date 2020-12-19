@@ -20,7 +20,7 @@ common deps
                      , bytestring
                      , text
                      , unordered-containers
-                     , megaparsec ^>= 8.0
+                     , megaparsec ^>= 9.0
                      , parser-combinators
                      , linear
                      , split
@@ -76,6 +76,6 @@ library solutions
   import: deps, lang
   exposed-modules: Day01, Day02, Day03, Day04, Day05, Day06
                  , Day07, Day08, Day09, Day10, Day11, Day12
-                 , Day13, Day14, Day15, Day16, Day17
+                 , Day13, Day14, Day15, Day16, Day17, Day18
   hs-source-dirs: solutions
   build-depends: aoc2020, util

@@ -29,7 +29,7 @@ import Network.HTTP.Req as Req
 import Options.Applicative
 import qualified System.Console.ANSI as Ansi
 import System.Directory
-import Text.Megaparsec (parse, errorBundlePretty)
+import Text.Megaparsec (parse, errorBundlePretty, eof)
 import qualified Text.Toml as Toml
 import qualified Text.Toml.Types as Toml
 
@@ -210,7 +210,7 @@ runTestsOn day sln@Solution{tests,decodeInput} parts = do
     let (dyns, input, expected) = processTest thisTest
     fgColor Ansi.Vivid Ansi.Blue
     printf "  Test #%v\n" n
-    case parse decodeInput "<test input>" . List.dropWhile isSpace . List.dropWhileEnd isSpace $ input of
+    case parse (decodeInput <* eof) "<test input>" . List.dropWhile isSpace . List.dropWhileEnd isSpace $ input of
       Left err -> do
         fgColor Ansi.Dull Ansi.Red
         printf "    Couldn't decode test input.\n"
@@ -249,7 +249,7 @@ runSolveOn day opts cfg upload sln parts = do
   printf "Running solution for day %v...\n" day
   let infile = printf "%s/day%.2d.txt" (oInputDataDir opts) day
   input <- readFile infile
-  case parse (decodeInput sln) infile . List.dropWhile isSpace . List.dropWhileEnd isSpace $ input of
+  case parse (decodeInput sln <* eof) infile . List.dropWhile isSpace . List.dropWhileEnd isSpace $ input of
     Left err -> do
       fgColor Ansi.Dull Ansi.Red
       printf "  Couldn't decode input! \n"

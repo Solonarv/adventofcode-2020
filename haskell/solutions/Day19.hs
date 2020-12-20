@@ -5,7 +5,7 @@ import Prelude hiding (lex)
 
 import Data.Char
 import Data.Foldable
--- import Debug.Trace
+import Data.Maybe
 import Text.ParserCombinators.ReadP (ReadP)
 import qualified Text.ParserCombinators.ReadP as ReadP
 
@@ -28,7 +28,7 @@ solution = Solution
   , solveB = defSolver
     { solve = \(rules, msgs) ->
         \case p -> countHits (matches p) msgs
-        <$> toParser (extraRules `IntMap.union` rules)
+        <$> toParserExtra rules
     }
   , tests =
     [ unlines
@@ -111,7 +111,6 @@ rule = do
   i <- lex decimal
   lex ":"
   alts <- alt `sepBy` lex "|"
-  -- traceShowM (i, Rule alts)
   pure (i, Rule alts)
 
 alt :: Parser Alt
@@ -131,14 +130,27 @@ toParser rules = IntMap.lookup 0 $ löb (makeParser <$> rules)
       ]
     pieceParser _ (Atom lit) = () <$ ReadP.string lit
     pieceParser out (OtherRule i)
-      | Just r <- IntMap.lookup i out = r
-      | otherwise = fail $ "Rule " <> show i <> " is not defined!"
+      | r <- getRule i out = r
 
 matches :: ReadP () -> String -> Bool
 matches p s = not . null $ ReadP.readP_to_S (p <* ReadP.eof) s
 
-extraRules :: IntMap Rule
-extraRules = IntMap.fromList
-  [ (8, Rule [Alt [OtherRule 42], Alt [OtherRule 42, OtherRule 8]])
-  , (42, Rule [Alt [OtherRule 42, OtherRule 31], Alt [OtherRule 42, OtherRule 11, OtherRule 31]])
-  ]
+
+toParserExtra :: IntMap Rule -> Maybe (ReadP ())
+toParserExtra rules = IntMap.lookup 0 $ löb (IntMap.mapWithKey makeParser rules)
+  where
+    makeParser 8 _ out
+      | r42 <- getRule 42 out = () <$ some r42
+    makeParser 11 _ out
+      | r31 <- getRule 31 out
+      , r42 <- getRule 42 out = () <$ do l <- some r42 ; count (length l) r31
+    makeParser _ (Rule alts) out = asum
+      [ traverse_ (pieceParser out) pieces
+      | Alt pieces <- alts
+      ]
+    pieceParser _ (Atom lit) = () <$ ReadP.string lit
+    pieceParser out (OtherRule i)
+      | r <- getRule i out = r
+
+getRule :: Int -> IntMap (ReadP ()) -> ReadP ()
+getRule i m = fromMaybe (error $ "Rule " <> show i <> "is not defined!") $ IntMap.lookup i m
